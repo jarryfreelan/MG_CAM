@@ -1,0 +1,21 @@
+get_basic_info | GetBasicInfo()
+rates | GetRates(), GetRatesWithAccepted(), GetShortRates(), GetShortRatesWithAccepted
+balances | GetCoinBalances(), GetAllCoinBalances()
+get_deposit_address | GetDepositAddress()
+get_callback_address | GetOnlyCallbackAddress(), GetCallbackAddressWithIpn()
+convert_limits | GetConversionLimits()
+
+create_transaction | CreateSimpleTransaction(), CreateSimpleTransactionWithConversion(), CreateComplexTransaction(), CreateCustomTransaction()
+create_transfer | CreateMerchantTransfer()
+get_withdrawal_history | GetWithdrawalHistory()
+get_withdrawal_info | GetWithdrawalInformation()
+create_withdrawal & create_mass_withdrawal | CreateWithdrawal() & CreateMassWithdrawal() * using address only, not $PayByName, see below.
+
+convert | ConvertCoins()
+get_conversion_info | GetConversionInformation()
+get_pbn_info | GetProfileInformation()
+get_pbn_list | GetTagList()
+update_pbn_tag | UpdateTagProfile()
+claim_pbn_tag | ClaimPayByNameTag()
+create_transfer | CreatePayByNameTransfer()
+create_withdrawal & create_mass_withdrawal | CreateWithdrawal() & CreateMassWithdrawal() * using $PayByName instead of address
