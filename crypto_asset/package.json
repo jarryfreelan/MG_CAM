@@ -1,14 +1,14 @@
 {
-  "name": "@coreui/coreui-free-vue-admin-template",
+  "name": "MG",
   "version": "2.1.5",
-  "description": "Open Source Bootstrap Admin Template",
-  "author": "Łukasz Holeczek",
-  "homepage": "http://coreui.io",
-  "copyright": "Copyright 2018 creativeLabs Łukasz Holeczek",
+  "description": "Bootstrap Admin Template",
+  "author": "Jarry Free Lan",
+  "homepage": "",
+  "copyright": "Copyright 2019 MG",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git@github.com:coreui/coreui-free-vue-admin-template.git"
+    "url": "git@github.com/jarryfreelan/MG_CAM.git"
   },
   "scripts": {
     "serve": "vue-cli-service serve",
