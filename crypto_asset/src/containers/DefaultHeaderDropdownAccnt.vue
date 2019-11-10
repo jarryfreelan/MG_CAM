@@ -22,7 +22,7 @@
         <b-badge variant="secondary">{{ itemsCount }}</b-badge>
       </b-dropdown-item>
       <b-dropdown-divider />
-      <b-dropdown-item><i class="fa fa-lock" /> Logout</b-dropdown-item>
+      <b-dropdown-item @click="logout"><i class="fa fa-lock" /> Logout</b-dropdown-item>
     </template>
   </AppHeaderDropdown>
 </template>
@@ -36,6 +36,20 @@ export default {
   },
   data: () => {
     return { itemsCount: 42 }
+  },
+  methods: {
+    logout() {
+      var self = this
+      this.$auth.logout()
+      self.notifice('success', this.$ml.get('logged_out'), this.$ml.get('success_logout'))
+      this.$router.push('/login')
+    },
+    notifice (type, title, message) {
+      this.$notification[type]({
+        message: title,
+        description: message
+      })
+    },
   }
 }
 </script>

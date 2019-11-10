@@ -22,6 +22,9 @@
         <b-nav-item class="d-md-down-none">
           <i class="icon-location-pin"></i>
         </b-nav-item> -->
+        <b-nav-item class="d-md-down-none" @click = "switchLang()">
+          {{ lang }}
+        </b-nav-item>
         <DefaultHeaderDropdownAccnt/>
       </b-navbar-nav>
       <!-- <AsideToggler class="d-none d-lg-block" /> -->
@@ -39,6 +42,34 @@ export default {
     AppHeader,
     DefaultHeaderDropdownAccnt,
     SidebarToggler
+  },
+  data: () => {
+    return {
+      lang: 'CN'
+    }
+  },
+  mounted () {
+    this.$ml.change(localStorage.getItem('lang'))
+    this.changeLang()
+  },
+  methods: {
+    switchLang () {
+      if( this.$ml.get('lang') === 'cn') {
+        this.$ml.change('en')
+        localStorage.setItem('lang', 'en')
+      } else {
+        this.$ml.change('cn')
+        localStorage.setItem('lang', 'cn')
+      }
+      this.$router.go()
+    },
+    changeLang() {
+      if( this.$ml.get('lang') === 'cn') {
+        this.lang = '英'
+      } else {
+        this.lang = 'CN'
+      }
+    }
   }
 }
 </script>

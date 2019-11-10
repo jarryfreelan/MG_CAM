@@ -184,6 +184,9 @@ export default {
       },
     }
   },
+  mounted() {
+    this.$ml.change(localStorage.getItem('lang'))
+  },
   methods: {
     loginPage: function() {
       this.$router.push('/login');
@@ -319,6 +322,7 @@ export default {
     },
     switchLang (lang) {
       this.$ml.change(lang)
+      localStorage.setItem('lang', lang)
     },
   }
 }

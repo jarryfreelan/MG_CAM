@@ -103,7 +103,7 @@ export default {
                 // axios.defaults.headers.common['Authorization'] = resp.data.token
                 resolve({
                   code: resp.data.status,
-                  message: ''
+                  message: resp.data.msg
                 })
               } else {
                 const result = {

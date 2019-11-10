@@ -1,4 +1,7 @@
 export const enLangData = {
+  // Language
+  lang: 'en',
+
 	// views/user/login.vue 
   title: 'Crypto Asset Management',
   login: 'Login',
@@ -11,7 +14,13 @@ export const enLangData = {
   success_login: 'Successfully logged in',
   error_login: 'Login Fail',
   something_went_wrong_login: 'Something went wrong. User Login failed.',
+  wrong_username_password: 'Incorrect Username or Password',
 
+  // Logout: containers/DefaultHeaderDropdown
+  logged_out: 'Logged Out',
+  success_logout: 'Successfully logged Out',
+  error_logout: 'Logout Fail',
+  fail_logout: 'Something went wrong. User Logout failed.',
 
 	// views/user/register.vue 
   register: 'Register',

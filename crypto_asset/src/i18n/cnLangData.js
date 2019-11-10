@@ -1,4 +1,7 @@
 export const cnLangData = {
+  // Language
+  lang: 'cn',
+
   // views/user/login.vue 
   title: '加密资产管理',
   login: '登录',
@@ -11,8 +14,14 @@ export const cnLangData = {
   success_login: '成功登录',
   error_login: '登录失败',
   something_went_wrong_login: '用户登录失败',
+  wrong_username_password: '用户名或密码错误',
 
-
+  // Logout: containers/DefaultHeaderDropdown
+  logged_out: '登出',
+  success_logout: '成功登出',
+  error_logout: '登出失败',
+  fail_logout: '用户登出失败',
+  
   // views/user/register.vue 
   register: '注册',
   create_your_account: '注册您的帐户',

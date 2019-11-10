@@ -26,6 +26,7 @@
 
 <script>
 import nav from '@/_nav'
+import nav_cn from '@/_nav_cn'
 import { Sidebar as AppSidebar, SidebarFooter, SidebarForm, SidebarHeader, SidebarMinimizer, SidebarNav, Aside as AppAside, Breadcrumb } from '@coreui/vue'
 import DefaultAside from './DefaultAside'
 import DefaultHeader from './DefaultHeader'
@@ -50,10 +51,16 @@ export default {
   },
   data () {
     return {
-      nav: nav.items
+      nav: []
     }
   },
   mounted () {
+    if(this.$ml.get('lang') === 'cn') {
+      this.nav = nav_cn.items
+    } else {
+      this.nav = nav.items
+    }
+
     var self = this
     self.$auth.sessionCheck()
     setInterval(function(){ 

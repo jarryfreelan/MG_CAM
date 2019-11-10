@@ -71,6 +71,9 @@ export default {
       }
     }
   },
+  mounted() {
+    this.$ml.change(localStorage.getItem('lang'))
+  },
   methods: {
     signUp: function() {
       this.$router.push('/register');
@@ -88,7 +91,7 @@ export default {
           }
         })
         .catch((error) => {
-          self.notifice('error', this.$ml.get('error_login'), this.$ml.get('something_went_wrong_login'))
+          self.notifice('error', this.$ml.get('error_login'), this.$ml.get('wrong_username_password'))
         })
     },
     notifice (type, title, message) {
@@ -99,6 +102,7 @@ export default {
     },
     switchLang (lang) {
       this.$ml.change(lang)
+      localStorage.setItem('lang', lang)
     },
   }
 }
