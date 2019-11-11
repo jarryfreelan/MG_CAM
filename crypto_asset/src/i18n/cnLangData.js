@@ -29,7 +29,7 @@ export const cnLangData = {
   phone_number: '电话号码',
   repeat_password: '重复输入密码',
   create_account: '注册帐户',
-  already_have_account: '已经有帐号',
+  already_have_account: '已有帐号',
   success_register: '注册成功',
   account_was_created_success: '帐户注册成功！请登录',
   error_register: '注册失败',
