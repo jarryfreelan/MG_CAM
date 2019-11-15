@@ -1,149 +1,159 @@
 <?php
 	include 'init.php';
 
+	if (!isset($_SESSION['token'])) {
+	    exit(json_encode(array(
+    		'status' => 'TOKEN_FAIL',
+    		'msg' => 'Token is not exist'
+    	)));
+	} else {
+		$now = time(); // Checking the time now when home page starts.
+
+	    if ($now > $_SESSION['expire']) {
+	        session_destroy();
+	        exit(json_encode(array(
+	    		'status' => 'TOKEN_FAIL',
+	    		'msg' => 'Session is expired'
+	    	)));
+	    } else {
+	    	$stmt = $conn->prepare("SELECT count(*) AS u FROM ca_user WHERE user_id_no = ? AND user_token = ?");
+			$stmt->execute(array($_POST['id'], $_SESSION['token']));
+			$result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+			if($result['u'] <= 0) {
+				exit(json_encode(array(
+		    		'status' => 'TOKEN_FAIL',
+    				'msg' => 'Token is not match'
+		    	)));
+			}
+	    }
+	}
+
 	switch ($_POST['e']) {
-		case 'login':
-			$stmt = $conn->prepare("SELECT user_id, user_name, user_email, user_phone, user_img_url, user_password FROM user WHERE user_email = ?");
-			$stmt->execute(array($_POST['email']));
+
+		case 'updateProfile':
+			$stmt = $conn->prepare("UPDATE ca_user SET user_username = ?, user_email = ?, user_phone = ?, user_country = ? WHERE user_id_no = ?");
+			$stmt->execute(array($_POST['username'], $_POST['email'], $_POST['phone'], $_POST['country'], $_POST['id']));
+
+			$stmt = $conn->prepare("SELECT user_id_no, user_username, user_email, user_phone, user_country, user_key, user_password FROM ca_user WHERE user_id_no = ?");
+			$stmt->execute(array($_POST['id']));
+			$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+			$result = $results[0];
+			echo json_encode(array(
+				'status' => 'SUCCESS',
+				'user' => array(
+					'id' => $result['user_id_no'],
+					'username' => $result['user_username'],
+					'email' => $result['user_email'],
+					'phone' => $result['user_phone'],
+					'country' => $result['user_country']
+				)
+			));
+			break;
+
+		case 'updatePass':
+
+			$stmt = $conn->prepare("SELECT user_password, user_key FROM ca_user WHERE user_id_no = ?");
+			$stmt->execute(array($_POST['id']));
 			$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 			if(count($results) > 0) {
 				$result = $results[0];
-				$userID = $result['user_id'];
 
-				if(password_verify($_POST['password'], $result['user_password'])){
-					$token = generateRandomString();
-					$stmt = $conn->prepare("UPDATE user SET user_token = ? WHERE user_id = ?");
-					$stmt->execute(array($token, $userID));
+				if(password_verify($_POST['old'].$result['user_key'], $result['user_password'])){
+					$key = generateRandomString(30);
+					$hash = password_hash($_POST['new'].$key, PASSWORD_DEFAULT);
+
+					$stmt = $conn->prepare("UPDATE ca_user SET user_password = ?, user_key = ? WHERE user_id_no = ?");
+					$stmt->execute(array($hash, $key, $_POST['id']));
 
 					echo json_encode(array(
-						'status' => 'success',
-						'token' => $token,
-						'user' => array(
-							'name' => $result['user_name'],
-							'email' => $result['user_email'],
-							'phone' => $result['user_phone'],
-							'img' => $result['user_img_url']
-						)
+						'status' => 'SUCCESS',
+						'msg' => 'Password is changed successfully'
 					));
 				} else {
 					echo json_encode(array(
-						'status' => 'fail',
-						'msg' => 'Wrong Password'
+						'status' => 'FAIL',
+						'msg' => 'Old Password is incorrect'
 					));
 				}
 			} else {
 				echo json_encode(array(
-					'status' => 'fail',
+					'status' => 'FAIL',
+					'msg' => 'Username is not existing'
 				));
 			}
 			break;
 
-		case 'loginWithFacebook':
-
-			$stmt = $conn->prepare("SELECT user_id FROM user WHERE user_email = ?");
-			$stmt->execute(array($_POST['email']));
-			$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-			if(count($results) > 0) {
-				$result = $results[0];
-				$userID = $result['user_id'];
-
-				$stmt = $conn->prepare("UPDATE user 
-						SET user_facebook_id = ?, user_name = ?, user_email = ?, user_phone = ?, user_img_url = ?, user_token = ?
-						WHERE user_id = ?");
-				$stmt->execute(array($_POST['facebookID'], $_POST['name'], $_POST['email'], $_POST['mobileNo'], $_POST['img'], $_POST['token'], $userID));
-
-			} else {
-				$stmt = $conn->prepare("INSERT INTO user (user_facebook_id, user_name, user_email, user_phone, user_img_url, user_token) VALUES (?, ?, ?, ?, ?, ?)");
-				$stmt->execute(array($_POST['facebookID'], $_POST['name'], $_POST['email'], $_POST['mobileNo'], $_POST['img'], $_POST['token']));
-			}
-
-			echo json_encode(array(
-				'status' => 'success',
-				'token' => $_POST['token'],
-				'user' => array(
-					'name' => $_POST['name'],
-					'email' => $_POST['email'],
-					'phone' => $_POST['mobileNo'],
-					'img' => $_POST['img']
-				)
-			));
-			break;
-
-		case 'loginWithGoogle':
-
-			$stmt = $conn->prepare("SELECT user_id FROM user WHERE user_email = ?");
-			$stmt->execute(array($_POST['email']));
-			$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-			if(count($results) > 0) {
-				$result = $results[0];
-				$userID = $result['user_id'];
-
-				$stmt = $conn->prepare("UPDATE user 
-						SET user_google_id = ?, user_name = ?, user_email = ?, user_phone = ?, user_img_url = ?, user_token = ?
-						WHERE user_id = ?");
-				$stmt->execute(array($_POST['googleID'], $_POST['name'], $_POST['email'], $_POST['mobileNo'], $_POST['img'], $_POST['token'], $userID));
-
-			} else {
-				$stmt = $conn->prepare("INSERT INTO user (user_google_id, user_name, user_email, user_phone, user_img_url, user_token) VALUES (?, ?, ?, ?, ?, ?)");
-				$stmt->execute(array($_POST['googleID'], $_POST['name'], $_POST['email'], $_POST['mobileNo'], $_POST['img'], $_POST['token']));
-			}
-
-			echo json_encode(array(
-				'status' => 'success',
-				'token' => $_POST['token'],
-				'user' => array(
-					'name' => $_POST['name'],
-					'email' => $_POST['email'],
-					'phone' => $_POST['mobileNo'],
-					'img' => $_POST['img']
-				)
-			));
-			break;
-
-		case 'register':
-			$hash = password_hash($_POST['newPassword'], PASSWORD_DEFAULT);
-			$stmt = $conn->prepare("INSERT INTO user (user_name, user_email, user_phone, user_password) VALUES (?, ?, ?, ?)");
-			$stmt->execute(array($_POST['name'], $_POST['email'], $_POST['mobileNo'], $hash));
-			echo json_encode(array(
-				'status' => 'success',
-			));
-			break;
-
 		case 'checkExistingEmail':
-			$stmt = $conn->prepare("SELECT user_id FROM user WHERE user_email = ?");
-			$stmt->execute(array($_POST['email']));
+			$stmt = $conn->prepare("SELECT user_id_no FROM ca_user WHERE user_email = ? AND user_id_no <> ?");
+			$stmt->execute(array($_POST['email'], $_POST['id']));
 			$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 			if(count($results) > 0) {
 				echo json_encode(array(
-					'status' => 'Error',
+					'status' => 'ERROR',
 					'msg' => 'This email is already being used'
 				));
 			}else{
 				echo json_encode(array(
-					'status' => 'success',
+					'status' => 'SUCCESS',
 				));
 			}
 			break;
 
-		case 'checkExistingPhone':
-			$stmt = $conn->prepare("SELECT user_id FROM user WHERE user_phone = ?");
-			$stmt->execute(array($_POST['mobileNo']));
+		case 'checkExistingUsername':
+			$stmt = $conn->prepare("SELECT user_id_no FROM ca_user WHERE user_username = ? AND user_id_no <> ?");
+			$stmt->execute(array($_POST['username'], $_POST['id']));
 			$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 			if(count($results) > 0) {
 				echo json_encode(array(
-					'status' => 'Error',
-					'msg' => 'This phone number is already being used'
+					'status' => 'ERROR',
+					'msg' => 'This username is already being used'
 				));
 			}else{
 				echo json_encode(array(
-					'status' => 'success',
+					'status' => 'SUCCESS',
 				));
 			}
+			break;
+
+		case 'activate2FA':
+			$stmt = $conn->prepare("UPDATE ca_user SET user_secret = ?, user_2fa = 1 WHERE user_id_no = ?");
+			$stmt->execute(array($_POST['secret'], $_POST['id']));
+
+			echo json_encode(array(
+				'status' => 'SUCCESS',
+			));
+			break;
+
+		case 'deactivate2FA':
+			$g = new \Google\Authenticator\GoogleAuthenticator();
+
+			$stmt = $conn->prepare("SELECT user_secret FROM ca_user WHERE user_id_no = ?");
+			$stmt->execute(array($_POST['id']));
+			$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+			$result = $results[0];
+
+			if ($g->checkCode($result['user_secret'], $_POST['code2fa'])) {
+
+			  	$stmt = $conn->prepare("UPDATE ca_user SET user_secret = '', user_2fa = 0 WHERE user_id_no = ?");
+				$stmt->execute(array($_POST['id']));
+
+				echo json_encode(array(
+					'status' => 'SUCCESS',
+				));
+
+			} else {
+			  	echo json_encode(array(
+					'status' => 'ERROR',
+					'msg' => '2FA code is incorrect'
+				));
+			}
+			
 			break;
 
 		default:

@@ -12,6 +12,9 @@ export default {
     email: localStorage.getItem('caEmail') || '',
     id: localStorage.getItem('caId') || '',
     phone: localStorage.getItem('caPhone') || '',
+    country: localStorage.getItem('caCountry') || '',
+    authOtp: localStorage.getItem('caAuthOtp') || '',
+    authCode: localStorage.getItem('caAuthCode') || '',
   },
   mutations: {
     auth_success(state, token) {
@@ -30,10 +33,16 @@ export default {
       state.email = user.email
       state.phone = user.phone
       state.id = user.id
+      state.country = user.country
+      state.authOtp = user.authOtp
+      state.authCode = user.authCode
       localStorage.setItem('caUsername', user.username)
       localStorage.setItem('caEmail', user.email)
       localStorage.setItem('caPhone', user.phone)
       localStorage.setItem('caId', user.id)
+      localStorage.setItem('caCountry', user.country)
+      localStorage.setItem('caAuthOtp', user.authOtp)
+      localStorage.setItem('caAuthCode', user.authCode)
     },
     auth_error (state) {
       state.status = 'error'
@@ -42,12 +51,18 @@ export default {
       state.email = ''
       state.phone = ''
       state.id = ''
+      state.country = ''
+      state.authOtp = ''
+      state.authCode = ''
       localStorage.setItem('caStatus', 'error')
       localStorage.removeItem('caToken')
       localStorage.removeItem('caUsername')
       localStorage.removeItem('caEmail')
       localStorage.removeItem('caPhone')
       localStorage.removeItem('caId')
+      localStorage.removeItem('caCountry')
+      localStorage.removeItem('caAuthOtp')
+      localStorage.removeItem('caAuthCode')
     },
     session_timeout (state) {
       state.status = 'timeout'
@@ -56,12 +71,18 @@ export default {
       state.email = ''
       state.phone = ''
       state.id = ''
+      state.country = ''
+      state.authOtp = ''
+      state.authCode = ''
       localStorage.setItem('caStatus', 'error')
       localStorage.removeItem('caToken')
       localStorage.removeItem('caUsername')
       localStorage.removeItem('caEmail')
       localStorage.removeItem('caPhone')
       localStorage.removeItem('caId')
+      localStorage.removeItem('caCountry')
+      localStorage.removeItem('caAuthOtp')
+      localStorage.removeItem('caAuthCode')
     },
     logout (state) {
       state.status = 'logout'
@@ -70,12 +91,18 @@ export default {
       state.email = ''
       state.phone = ''
       state.id = ''
+      state.country = ''
+      state.authOtp = ''
+      state.authCode = ''
       localStorage.setItem('caStatus', 'error')
       localStorage.removeItem('caToken')
       localStorage.removeItem('caUsername')
       localStorage.removeItem('caEmail')
       localStorage.removeItem('caPhone')
       localStorage.removeItem('caId')
+      localStorage.removeItem('caCountry')
+      localStorage.removeItem('caAuthOtp')
+      localStorage.removeItem('caAuthCode')
     },
     UPDATE_USER(state, userJsonString) {
       const user = JSON.parse(userJsonString)
@@ -83,10 +110,16 @@ export default {
       state.email = user.email
       state.phone = user.phone
       state.id = user.id
+      state.country = user.country
+      state.authOtp = user.authOtp
+      state.authCode = user.authCode
       localStorage.setItem('caUsername', user.username)
       localStorage.setItem('caEmail', user.email)
       localStorage.setItem('caPhone', user.phone)
       localStorage.setItem('caId', user.id)
+      localStorage.setItem('caCountry', user.country)
+      localStorage.setItem('caAuthOtp', user.authOtp)
+      localStorage.setItem('caAuthCode', user.authCode)
     },
   },
   actions: {},
@@ -95,9 +128,12 @@ export default {
     email: state => state.email,
     phone: state => state.phone,
     id: state => state.id,
+    country: state => state.country,
     token: state => state.token,
     sess: state => state.sess,
     isLoggedIn: state => (state.token.length) > 0,
-    authStatus: state => state.status
+    authStatus: state => state.status,
+    authOtp: state => state.authOtp,
+    authCode: state => state.authCode
   },
 }

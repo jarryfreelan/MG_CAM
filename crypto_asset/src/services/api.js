@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
+import store from '@/store'
+import router from '@/router'
 import { globalConstData } from './global'
 
 Vue.use(Vuex)
@@ -8,18 +10,6 @@ Vue.use(Vuex)
 export default {
   install: (Vue, options) => {
     Vue.prototype.$api = {
-      requestMenu: async () => {
-        return new Promise((resolve, reject) => {
-          // Call list of menu from backend server (php)
-          axios({ url: globalConstData.db_url + '/menuDemo.php', method: 'POST' })
-            .then(resp => {
-              resolve(resp.data)
-            })
-            .catch(err => {
-              reject(err)
-            })
-        })
-      },
       uploadFile: async (formData) => {
         return new Promise((resolve, reject) => {
           // Call list of menu from backend server (php)
@@ -44,11 +34,23 @@ export default {
               params.append(key, value)
             }
           }
+          params.append('id', store.getters.id)
+          params.append('token', store.getters.token)
+          params.append('sess', store.getters.sess)
           axios({ url: globalConstData.api_url, data: params, method: 'POST' })
             .then(resp => {
-              resolve(resp.data)
+              if(resp.data.status === 'TOKEN_FAIL') {
+                store.commit('session_timeout')
+                router.push('/login')
+              } else if (resp.data.status === 'SUCCESS') {
+                resolve(resp.data)
+              } else {
+                reject(resp.data)
+              }
             })
             .catch(err => {
+              store.commit('auth_error')
+              router.push('/login')
               reject(err)
             })
         })

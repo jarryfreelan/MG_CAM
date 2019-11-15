@@ -21,7 +21,7 @@
     <div class="container">
       <b-row class="justify-content-center">
         <b-col md="6" sm="8">
-          <b-card no-body class="mx-4">
+          <b-card no-body class="p-0" style="min-width: 280px;">
             <b-card-body class="p-4">
               <b-form @submit="onSubmitR">
                 <h1>{{ $ml.get('register') }}</h1>
@@ -83,6 +83,7 @@
                       class="form-control"
                       id="phone"
                       v-model="form.phone"
+                      required
                       :valid-characters-only="true"
                       :placeholder="$ml.get('phone_number')"
                       style="padding: 3px 0 3px 0;"
@@ -165,6 +166,7 @@ export default {
         username: '',
         email: '',
         phone: '',
+        country: '',
         password: '',
         repeatPassword: ''
       },
@@ -269,6 +271,7 @@ export default {
     },
     checkPhone (formattedNumber, { number, valid, country }) {
       this.form.phone = number.international
+      this.form.country = country.name
       if (!valid) {
         if (number.international) {
           this.invalidFeedback.phone = this.$ml.get('invalid_phone')

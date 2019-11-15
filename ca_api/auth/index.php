@@ -4,53 +4,65 @@
 	if($_POST['e']) {
 		switch ($_POST['e']) {
 			case 'login':
-				$stmt = $conn->prepare("SELECT user_id_no, user_username, user_email, user_phone, user_key, user_password FROM ca_user WHERE user_username = ?");
-				$stmt->execute(array($_POST['username']));
-				$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-				if(count($results) > 0) {
-					$result = $results[0];
-					$user_id = $result['user_id_no'];
+				if($_SESSION['captcha'] == $_POST['captcha']) {
+					$stmt = $conn->prepare("SELECT user_id_no, user_username, user_email, user_phone, user_country, user_2fa, user_otp, user_key, user_password FROM ca_user WHERE user_username = ?");
+					$stmt->execute(array($_POST['username']));
+					$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-					if(password_verify($_POST['password'].$result['user_key'], $result['user_password'])){
-						$token = generateRandomString(30);
-						$stmt = $conn->prepare("UPDATE ca_user SET user_token = ? WHERE user_id_no = ?");
-						$stmt->execute(array($token, $user_id));
+					if(count($results) > 0) {
+						$result = $results[0];
+						$user_id = $result['user_id_no'];
 
-						$_SESSION['token'] = $token;
-			            $_SESSION['start'] = time(); 
-			            $_SESSION['expire'] = $_SESSION['start'] + (30 * 60);
+						if(password_verify($_POST['password'].$result['user_key'], $result['user_password'])){
+							$token = generateRandomString(30);
+							$stmt = $conn->prepare("UPDATE ca_user SET user_token = ? WHERE user_id_no = ?");
+							$stmt->execute(array($token, $user_id));
 
-						echo json_encode(array(
-							'status' => 'SUCCESS',
-							'token' => $token,
-							'sess' => session_id(),
-							'user' => array(
-								'id' => $result['user_id_no'],
-								'username' => $result['user_username'],
-								'email' => $result['user_email'],
-								'phone' => $result['user_phone']
-							)
-						));
+							$_SESSION['token'] = $token;
+				            $_SESSION['start'] = time(); 
+				            $_SESSION['expire'] = $_SESSION['start'] + (240 * 60);
+
+							echo json_encode(array(
+								'status' => 'SUCCESS',
+								'token' => $token,
+								'sess' => session_id(),
+								'user' => array(
+									'id' => $result['user_id_no'],
+									'username' => $result['user_username'],
+									'email' => $result['user_email'],
+									'phone' => $result['user_phone'],
+									'country' => $result['user_country'],
+									'authOtp' => $result['user_otp'],
+									'authCode' => $result['user_2fa']
+								)
+							));
+						} else {
+							echo json_encode(array(
+								'status' => 'FAIL',
+								'msg' => 'Wrong Password'
+							));
+						}
 					} else {
 						echo json_encode(array(
 							'status' => 'FAIL',
-							'msg' => 'Wrong Password'
+							'msg' => 'Username is not existing'
 						));
 					}
 				} else {
 					echo json_encode(array(
-						'status' => 'FAIL',
-						'msg' => 'Username is not existing'
+						'status' => 'FAIL_CAPTCHA',
+						'msg' => 'Captcha is incorrect'
 					));
 				}
+					
 				break;
 
 			case 'register':
 				$key = generateRandomString(30);
 				$hash = password_hash($_POST['password'].$key, PASSWORD_DEFAULT);
-				$stmt = $conn->prepare("INSERT INTO ca_user (user_username, user_email, user_phone, user_password, user_key) VALUES (?, ?, ?, ?, ?)");
-				$stmt->execute(array($_POST['username'], $_POST['email'], $_POST['phone'], $hash, $key));
+				$stmt = $conn->prepare("INSERT INTO ca_user (user_username, user_email, user_phone, user_country, user_password, user_key) VALUES (?, ?, ?, ?, ?, ?)");
+				$stmt->execute(array($_POST['username'], $_POST['email'], $_POST['phone'], $_POST['country'], $hash, $key));
 
 				$user_id = $conn->lastInsertId();
 				$uni_user_id = generateRandomString(15).$user_id;

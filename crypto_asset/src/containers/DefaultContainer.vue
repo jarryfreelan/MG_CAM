@@ -11,7 +11,7 @@
       </AppSidebar>
       <main class="main">
         <Breadcrumb :list="list"/>
-        <div class="container-fluid">
+        <div id="main-container">
           <router-view></router-view>
         </div>
       </main>
@@ -51,22 +51,41 @@ export default {
   },
   data () {
     return {
-      nav: []
+      nav: [],
+      isDesktop: true
     }
   },
   mounted () {
+
+    const self = this
+    self.resizeContainer()
+    
+    window.addEventListener('resize' ,function() {
+      self.resizeContainer()
+    })
+
     if(this.$ml.get('lang') === 'cn') {
       this.nav = nav_cn.items
     } else {
       this.nav = nav.items
     }
 
-    var self = this
     self.$auth.sessionCheck()
     setInterval(function(){ 
       self.$auth.sessionCheck()
-    }, 60000);
+    }, 300000);
     // 1000 = 1 second
+  },
+  methods: {
+    resizeContainer() {
+      var windowWidth = document.documentElement.clientWidth
+
+      if (windowWidth < 768) {
+        $('#main-container').removeClass('container-fluid')
+      } else {
+        $('#main-container').addClass('container-fluid')
+      }
+    }
   },
   computed: {
     name () {

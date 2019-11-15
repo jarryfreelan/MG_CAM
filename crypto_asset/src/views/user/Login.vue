@@ -21,7 +21,7 @@
     <div class="container">
       <b-row class="justify-content-center">
         <b-col md="4">
-          <b-card no-body class="p-0">
+          <b-card no-body class="p-0" style="min-width: 280px;">
             <b-card-body>
               <b-form @submit="onSubmit">
                 <h1>{{ $ml.get('login') }}</h1>
@@ -34,11 +34,19 @@
                   <b-input-group-prepend><b-input-group-text><i class="icon-lock"></i></b-input-group-text></b-input-group-prepend>
                   <b-form-input type="password" class="form-control" v-model="form.password" :placeholder="$ml.get('password')" autocomplete="current-password" />
                 </b-input-group>
+                <b-input-group class="mb-4">
+                  <b-input-group-prepend><b-input-group-text><i class="fa fa-chain"></i></b-input-group-text></b-input-group-prepend>
+                  <b-form-input type="text" class="form-control" v-model="form.captcha" :placeholder="$ml.get('captcha')" autocomplete="captcha" style="margin-right: 10px;" />
+                  <img :src="captchaImageUrl" alt="CAPTCHA" class="captcha-image">
+                  <b-input-group-prepend @click="reloadCaptcha"><b-input-group-text><i class="fa fa-refresh"></i></b-input-group-text></b-input-group-prepend>
+                </b-input-group>
+                
                 <b-button type="submit" variant="primary" block squared>{{ $ml.get('login') }}</b-button>
               </b-form>
             </b-card-body>
             <b-row class="px-4">
               <b-col cols="6">
+                
                 <b-button variant="link" class="px-0" @click="signUp">{{ $ml.get('sign_up') }}</b-button>
               </b-col>
               <b-col cols="6" class="text-right">
@@ -61,6 +69,8 @@
 </template>
 
 <script>
+import { globalConstData } from '@/services/global'
+
 export default {
   name: 'Login',
   data () {
@@ -68,11 +78,15 @@ export default {
       form: {
         username: '',
         password: '',
-      }
+        captcha: '',
+        sess: '',
+      },
+      captchaImageUrl: '',
     }
   },
   mounted() {
     this.$ml.change(localStorage.getItem('lang'))
+    this.reloadCaptcha()
   },
   methods: {
     signUp: function() {
@@ -91,7 +105,11 @@ export default {
           }
         })
         .catch((error) => {
-          self.notifice('error', this.$ml.get('error_login'), this.$ml.get('wrong_username_password'))
+          if(error.code === 'FAIL_CAPTCHA') {
+            self.notifice('error', this.$ml.get('error_login'), this.$ml.get('wrong_captcha'))
+          }else{
+            self.notifice('error', this.$ml.get('error_login'), this.$ml.get('wrong_username_password'))
+          }
         })
     },
     notifice (type, title, message) {
@@ -103,6 +121,19 @@ export default {
     switchLang (lang) {
       this.$ml.change(lang)
       localStorage.setItem('lang', lang)
+    },
+    reloadCaptcha() {
+      this.generateKey()
+      this.captchaImageUrl = globalConstData.captcha_url+"?t="+new Date().getTime()+"&s="+this.form.sess
+    },
+    generateKey(length=100) {
+      var result = ''
+      var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+      var charactersLength = characters.length
+      for ( var i = 0; i < length; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength))
+      }
+      this.form.sess = result
     },
   }
 }

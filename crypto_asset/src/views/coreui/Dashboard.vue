@@ -569,7 +569,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
   /* IE fix */
   #card-chart-01, #card-chart-02 {
     width: 100% !important;
